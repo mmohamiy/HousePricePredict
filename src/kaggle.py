@@ -212,6 +212,12 @@ MyXgboost = xgb.XGBRegressor(n_estimators=3000, learning_rate=0.08, gamma=0, sub
 
 train_test(MyXgboost, x_train, x_test, y_train, y_test)
 
+Mylgb = lgb.LGBMRegressor(objective='regression',num_leaves=5,
+                              learning_rate=0.05, n_estimators=720,
+                              max_bin = 55, bagging_fraction = 0.8,
+                              bagging_freq = 5, feature_fraction = 0.2319,
+                              feature_fraction_seed=9, bagging_seed=9,
+                              min_data_in_leaf =6, min_sum_hessian_in_leaf = 11).fit(x_train,y_train)
 
 # Average R2 score and standart deviation of 5-fold cross-validation
 scores = cross_val_score(MyXgboost, train_features_st, train_labels, cv=5)
@@ -221,9 +227,10 @@ print("Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
 GB_model = GBest.fit(train_features, train_labels)
 ENST_model = ENSTest.fit(train_features_st, train_labels)
 XGB_Model = MyXgboost.fit(train_features_st, train_labels)
+LGB_Model = 
 
 ## Getting our SalePrice estimation
-Final_labels = (np.exp(MyXgboost.predict(test_features)) + np.exp(ENST_model.predict(test_features_st)) + np.exp(GB_model.predict(test_features_st))) / 3
+Final_labels = (np.exp(MyXgboost.predict(test_features)) + np.exp( ENST_model.predict(test_features_st) ) ) / 2
 
 ## Saving to CSV
 pd.DataFrame({'Id': test.Id, 'SalePrice': Final_labels}).to_csv('submission.csv', index=False)
