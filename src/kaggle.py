@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn import ensemble, tree, linear_model
+from sklearn.linear_model import LassoCV
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.metrics import r2_score, mean_squared_error
 from sklearn.utils import shuffle
@@ -56,7 +57,7 @@ features = pd.concat([train, test], keys=['train', 'test'])
 
 # I decided to get rid of features that have more than half of missing information or do not correlate to SalePrice
 features.drop(
-    ['Utilities', 'RoofMatl', 'MasVnrArea', 'BsmtFinSF1', 'BsmtFinSF2', 'BsmtUnfSF', 'Heating', 'LowQualFinSF',
+    ['MSZoning','SaleType','Utilities', 'RoofMatl', 'MasVnrArea', 'BsmtFinSF1', 'BsmtFinSF2', 'BsmtUnfSF', 'Heating', 'LowQualFinSF',
      'BsmtFullBath', 'BsmtHalfBath', 'Functional', 'GarageYrBlt', 'GarageArea', 'GarageCond', 'WoodDeckSF',
      'OpenPorchSF', 'EnclosedPorch', '3SsnPorch', 'ScreenPorch', 'PoolArea', 'PoolQC', 'Fence', 'MiscFeature',
      'MiscVal'],
@@ -64,9 +65,6 @@ features.drop(
 
 # MSSubClass as str
 features['MSSubClass'] = features['MSSubClass'].astype(str)
-
-# MSZoning NA in pred. filling with most popular values
-features['MSZoning'] = features['MSZoning'].fillna(features['MSZoning'].mode()[0])
 
 # LotFrontage  NA in all. I suppose NA means 0
 features['LotFrontage'] = features['LotFrontage'].fillna(features['LotFrontage'].mean())
@@ -107,8 +105,6 @@ for col in ('GarageType', 'GarageFinish', 'GarageQual'):
 # GarageCars  NA in pred. I suppose NA means 0
 features['GarageCars'] = features['GarageCars'].fillna(0.0)
 
-# SaleType NA in pred. filling with most popular values
-features['SaleType'] = features['SaleType'].fillna(features['SaleType'].mode()[0])
 
 # Year and Month to categorical
 features['YrSold'] = features['YrSold'].astype(str)
@@ -218,6 +214,11 @@ Mylgb = lgb.LGBMRegressor(objective='regression',num_leaves=5,
                               bagging_freq = 5, feature_fraction = 0.2319,
                               feature_fraction_seed=9, bagging_seed=9,
                               min_data_in_leaf =6, min_sum_hessian_in_leaf = 11).fit(x_train,y_train)
+train_test(Mylgb, x_train, x_test, y_train, y_test)
+
+Mylasso = LassoCV(alphas = [1, 0.1, 0.001, 0.0005]).fit(x_train,y_train)
+train_test(Mylasso, x_train, x_test, y_train, y_test)
+
 
 # Average R2 score and standart deviation of 5-fold cross-validation
 scores = cross_val_score(MyXgboost, train_features_st, train_labels, cv=5)
@@ -227,10 +228,10 @@ print("Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
 GB_model = GBest.fit(train_features, train_labels)
 ENST_model = ENSTest.fit(train_features_st, train_labels)
 XGB_Model = MyXgboost.fit(train_features_st, train_labels)
-LGB_Model = 
+LGB_Model = Mylgb.fit(train_features_st, train_labels)
 
 ## Getting our SalePrice estimation
-Final_labels = (np.exp(MyXgboost.predict(test_features)) + np.exp( ENST_model.predict(test_features_st) ) ) / 2
+Final_labels = (np.exp(Mylasso.predict(test_features)) + np.exp(MyXgboost.predict(test_features)) + np.exp( ENST_model.predict(test_features_st) ) + np.exp(LGB_Model.predict(test_features_st)) ) / 4
 
 ## Saving to CSV
 pd.DataFrame({'Id': test.Id, 'SalePrice': Final_labels}).to_csv('submission.csv', index=False)
