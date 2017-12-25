@@ -231,7 +231,7 @@ XGB_Model = MyXgboost.fit(train_features_st, train_labels)
 LGB_Model = Mylgb.fit(train_features_st, train_labels)
 
 ## Getting our SalePrice estimation
-Final_labels = (np.exp(Mylasso.predict(test_features)) + np.exp(MyXgboost.predict(test_features)) + np.exp( ENST_model.predict(test_features_st) ) + np.exp(LGB_Model.predict(test_features_st)) ) / 4
-
+Final_labels = (np.exp(MyXgboost.predict(test_features)) + np.exp( ENST_model.predict(test_features_st) ) + np.exp(LGB_Model.predict(test_features_st)) ) / 4
+Final_labels = ( np.exp(Mylasso.predict(test_features)) + Final_labels ) / 2
 ## Saving to CSV
 pd.DataFrame({'Id': test.Id, 'SalePrice': Final_labels}).to_csv('submission.csv', index=False)
