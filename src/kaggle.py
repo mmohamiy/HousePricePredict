@@ -229,9 +229,10 @@ GB_model = GBest.fit(train_features, train_labels)
 ENST_model = ENSTest.fit(train_features_st, train_labels)
 XGB_Model = MyXgboost.fit(train_features_st, train_labels)
 LGB_Model = Mylgb.fit(train_features_st, train_labels)
+Lasso_Model = Mylasso.fit(train_features_st, train_labels)
 
 ## Getting our SalePrice estimation
-Final_labels = (np.exp(MyXgboost.predict(test_features)) + np.exp( ENST_model.predict(test_features_st) ) + np.exp(LGB_Model.predict(test_features_st)) ) / 4
-Final_labels = ( np.exp(Mylasso.predict(test_features)) + Final_labels ) / 2
+Final_labels = (np.exp(Lasso_Model.predict(test_features)) + np.exp(XGB_Model.predict(test_features)) + np.exp( ENST_model.predict(test_features_st) ) + np.exp(LGB_Model.predict(test_features_st)) ) / 4
+
 ## Saving to CSV
 pd.DataFrame({'Id': test.Id, 'SalePrice': Final_labels}).to_csv('submission.csv', index=False)

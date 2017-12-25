@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn import ensemble, tree, linear_model
+from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.metrics import r2_score, mean_squared_error
 from sklearn.utils import shuffle
@@ -192,12 +193,18 @@ train_test(GBest, x_train, x_test, y_train, y_test)
 scores = cross_val_score(GBest, train_features_st, train_labels, cv=5)
 print("Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
 
+
+'''
+Linear Regression
+'''
+LinearReg = linear_model.LinearRegression().fit(x_train, y_train)
+
 # Retraining models
 GB_model = GBest.fit(train_features, train_labels)
 ENST_model = ENSTest.fit(train_features_st, train_labels)
 
 ## Getting our SalePrice estimation
-Final_labels = (np.exp(GB_model.predict(test_features)) + np.exp(ENST_model.predict(test_features_st))) / 2
+Final_labels = (np.exp(LinearReg.predict(test_features)) + np.exp(ENST_model.predict(test_features_st))) / 2
 
 ## Saving to CSV
 pd.DataFrame({'Id': test.Id, 'SalePrice': Final_labels}).to_csv('submission.csv', index =False)
