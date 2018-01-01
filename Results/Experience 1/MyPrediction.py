@@ -1,29 +1,27 @@
-# import some necessary librairies
 
-import numpy as np  # linear algebra
-import pandas as pd  # data processing, CSV file I/O (e.g. pd.read_csv)
+#import some necessary librairies
+
+import numpy as np # linear algebra
+import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
 import matplotlib.pyplot as plt  # Matlab-style plotting
 import seaborn as sns
-
 color = sns.color_palette()
 sns.set_style('darkgrid')
 import warnings
-
-
 def ignore_warn(*args, **kwargs):
     pass
+warnings.warn = ignore_warn #ignore annoying warning (from sklearn and seaborn)
 
-
-warnings.warn = ignore_warn  # ignore annoying warning (from sklearn and seaborn)
 
 from scipy import stats
-from scipy.stats import norm, skew  # for some statistics
+from scipy.stats import norm, skew #for some statistics
 
-pd.set_option('display.float_format', lambda x: '{:.3f}'.format(x))  # Limiting floats output to 3 decimal points
+
+pd.set_option('display.float_format', lambda x: '{:.3f}'.format(x)) #Limiting floats output to 3 decimal points
+
 
 from subprocess import check_output
-
-print(check_output(["ls", "Data"]).decode("utf8"))  # check the files available in the directory
+print(check_output(["ls", "Data"]).decode("utf8")) #check the files available in the directory
 
 """ ¡¡¡¡ Let's Start !!!"""
 
@@ -32,7 +30,7 @@ train = pd.read_csv('Data/train.csv')
 test = pd.read_csv('Data/test.csv')
 
 # Getting the train columns's names
-print("Train data set index :\n " + str(train.index) + "\n")
+print("Train data set index :\n " + str(train.index) + "\n" )
 
 # Getting the test columns's names
 print(test.head(5))
@@ -41,17 +39,19 @@ print(test.head(5))
 print("The train data size before dropping Id feature is : {} ".format(train.shape))
 print("The test data size before dropping Id feature is : {} ".format(test.shape))
 
+
 # Making a copy of the 'Id' column of each data set
 train_ID = train['Id']
 test_ID = test['Id']
 
 # Drop the  'Id' column. Will only be used in the submession file.
-train.drop('Id', axis=1, inplace=True)
-test.drop('Id', axis=1, inplace=True)
+train.drop('Id', axis = 1, inplace = True)
+test.drop('Id', axis = 1, inplace = True)
 
 # Getting the number of rows and features in each data set, after the Id column's been droped.
 print("\nThe train data size after dropping Id feature is : {} ".format(train.shape))
 print("The test data size after dropping Id feature is : {} ".format(test.shape))
+
 
 '''
 # Skewness and Kurtosis
@@ -72,25 +72,26 @@ print("SalePrice Kurtosis before being transformed: %f" % train['SalePrice'].kur
 '''
 Fitting train['SalePrice'] and Plotting its distribution before and after applyig Log transformation
 '''
-sns.distplot(train['SalePrice'], fit=norm);
+sns.distplot(train['SalePrice'] , fit=norm);
 
 # Get the fitted parameters used by the function
 (mu, sigma) = norm.fit(train['SalePrice'])
-print('\n mu = {:.2f} and sigma = {:.2f}\n'.format(mu, sigma))
+print( '\n mu = {:.2f} and sigma = {:.2f}\n'.format(mu, sigma))
 
-# Now plot the distribution
+#Now plot the distribution
 plt.legend(['Normal dist. ($\mu=$ {:.2f} and $\sigma=$ {:.2f} )'.format(mu, sigma)],
-           loc='best')
+            loc='best')
 plt.ylabel('Frequency')
 plt.title('SalePrice distribution')
 plt.show()
 
-# Get also the QQ-plot
+#Get also the QQ-plot
 fig = plt.figure()
 res = stats.probplot(train['SalePrice'], plot=plt)
 plt.show()
 
-# Applying log transformation
+
+#Applying log transformation
 train['SalePrice'] = np.log(train['SalePrice'])
 
 '''
@@ -99,21 +100,21 @@ train['SalePrice'] = np.log(train['SalePrice'])
 We note how we got mor normal values for SalePrice, the mayority of the values are fairly distributed on the 2 sides of
 the mean. 
 '''
-# Check the new distribution
-sns.distplot(train['SalePrice'], fit=norm);
+#Check the new distribution
+sns.distplot(train['SalePrice'] , fit=norm);
 
 # Get the fitted parameters used by the function
 (mu, sigma) = norm.fit(train['SalePrice'])
-print('\n mu = {:.2f} and sigma = {:.2f}\n'.format(mu, sigma))
+print( '\n mu = {:.2f} and sigma = {:.2f}\n'.format(mu, sigma))
 
-# Now plot the distribution
+#Now plot the distribution
 plt.legend(['Normal dist. ($\mu=$ {:.2f} and $\sigma=$ {:.2f} )'.format(mu, sigma)],
-           loc='best')
+            loc='best')
 plt.ylabel('Frequency')
 plt.title('SalePrice distribution')
 plt.show()
 
-# Get also the QQ-plot
+#Get also the QQ-plot
 fig = plt.figure()
 res = stats.probplot(train['SalePrice'], plot=plt)
 plt.show()
@@ -121,29 +122,32 @@ plt.show()
 print("\nSalePrice Skewness after being transformed with log: %f" % train['SalePrice'].skew())
 print("SalePrice Kurtosis after being transformed with log: %f" % train['SalePrice'].kurt())
 
-# Obtaining the rows number of each data set, train and test
+
+#Obtaining the rows number of each data set, train and test
 train_rows_number = train.shape[0]
 test_rows_number = test.shape[0]
 
 # Save the Target Column values. So it will be dropped in the following steps.
 y_train = train.SalePrice.values
 
-# Concatenating the train and test data sets
+#Concatenating the train and test data sets
 Global_Data = pd.concat((train, test)).reset_index(drop=True)
 
 # Getting the new data shape
 print("Global_Data size is : {}".format(Global_Data.shape))
-Global_Data_Cardinality = Global_Data.shape[0]  # the rows number of Global Data
+Global_Data_Cardinality= Global_Data.shape[0] #the rows number of Global Data
 
 # Detecting duplicates ... In this step we delete the duplicated rows
 Global_Data.drop_duplicates()
 Global_Data_rows_without_duplicates = Global_Data.shape[0]
 duplicates_number = Global_Data_Cardinality - Global_Data_rows_without_duplicates
-print("\nThere are " + str(duplicates_number) + " DUPLICATES in Global_Data\n")
+print("\nThere are "+str(duplicates_number)+" DUPLICATES in Global_Data\n")
+
 
 # Drop the Targer column ...
 Global_Data.drop(['SalePrice'], axis=1, inplace=True)
 print("Global_Data size after deleting the Targer column is : {}".format(Global_Data.shape))
+
 
 """
 Detecting Anamolies (noise) ... Afrer the Target column 'SalePrice' has been droped, and the duplicates has been 
@@ -152,7 +156,7 @@ the same values for all features except the Target column.
 """
 Global_Data.drop_duplicates()
 noise_number = Global_Data_Cardinality - Global_Data.shape[0]
-print("\nThere are " + str(noise_number) + " NOISE in Global_Data\n")
+print("\nThere are "+str(noise_number)+" NOISE in Global_Data\n")
 
 """
 As we can see we're so lucky to not have any duplicates or noise data, but let's see if we have no missing data too. 
@@ -165,8 +169,9 @@ In these following steps we gonna analyze the missing data and see how we gonna 
 """
 Global_Data_NA = (Global_Data.isnull().sum() / len(Global_Data)) * 100
 Global_Data_NA = Global_Data_NA.drop(Global_Data_NA[Global_Data_NA == 0].index).sort_values(ascending=False)
-missing_data = pd.DataFrame({'Missing Ratio': Global_Data_NA})
-print("Missing Ratio is rated by % values:\n" + str(missing_data.head(int(Global_Data.shape[1]))))
+missing_data = pd.DataFrame({'Missing Ratio' :Global_Data_NA})
+print("Missing Ratio is rated by % values:\n"+str(missing_data.head( int(Global_Data.shape[1] ) ) ) )
+
 
 # Representing the missing data percentage in each feature
 f, ax = plt.subplots(figsize=(15, 12))
@@ -179,27 +184,17 @@ plt.show()
 
 """
 We can sea clearly how some features, almost has nothing of values ..
-
+ 
 I think dropping the features with more than 90% of missing values, "probably" will have no effect on our prediction re-
 ults. In this case we have :
     PoolQC               99.657
     MiscFeature          96.403
     Alley                93.217
-
+    
 "I will study both cases, cause nothing is certain in data science :)". 
 """
-
-# Case 1
-"""
-print("feature with more than 90% of missing values: " + (missing_data[missing_data['Missing Ratio'] >= 90]).index)
-Global_Data = Global_Data.drop((missing_data[missing_data['Missing Ratio'] >= 90]).index, 1)
-"""
-
-#Case 2
-Global_Data["PoolQC"] = Global_Data["PoolQC"].fillna("None")
-Global_Data["MiscFeature"] = Global_Data["MiscFeature"].fillna("None")
-Global_Data["Alley"] = Global_Data["Alley"].fillna("None")
-
+print("feature with more than 90% of missing values: "+(missing_data[missing_data['Missing Ratio'] >= 90 ]).index)
+Global_Data = Global_Data.drop((missing_data[missing_data['Missing Ratio'] >= 90 ]).index,1)
 
 """
 Let's try to fill the missing data of each feature with the most appropriate values, as we think that so it is ...
@@ -212,6 +207,7 @@ Global_Data['LotFrontage'] = Global_Data['LotFrontage'].fillna(Global_Data['LotF
 
 # Fence Na in all. NA means no fence
 Global_Data["Fence"] = Global_Data["Fence"].fillna("No Fence")
+
 
 # Converting OverallCond to str
 Global_Data.OverallCond = Global_Data.OverallCond.astype(str)
@@ -229,7 +225,7 @@ for col in ('BsmtQual', 'BsmtCond', 'BsmtExposure', 'BsmtFinType1', 'BsmtFinType
 BsmtFinSF1, BsmtFinSF2, BsmtUnfSF, TotalBsmtSF, BsmtFullBath and BsmtHalfBath : missing values are likely zero for
 having no basement.
 """
-for col in ('BsmtFinSF1', 'BsmtFinSF2', 'BsmtUnfSF', 'TotalBsmtSF', 'BsmtFullBath', 'BsmtHalfBath'):
+for col in ('BsmtFinSF1', 'BsmtFinSF2', 'BsmtUnfSF','TotalBsmtSF', 'BsmtFullBath', 'BsmtHalfBath'):
     Global_Data[col] = Global_Data[col].fillna(0)
 
 # TotalBsmtSF  NA in pred. I suppose NA means 0
@@ -265,7 +261,7 @@ Global_Data['SaleType'] = Global_Data['SaleType'].fillna(Global_Data['SaleType']
 LotFrontage : Since the area of each street connected to the house property most likely have a similar area to other ho-
 uses in its neighborhood , we can fill in missing values by the median LotFrontage of the neighborhood.
 """
-# Group by neighborhood and fill in missing value by the median LotFrontage of all the neighborhood
+#Group by neighborhood and fill in missing value by the median LotFrontage of all the neighborhood
 Global_Data["LotFrontage"] = Global_Data.groupby("Neighborhood")["LotFrontage"].transform(
     lambda x: x.fillna(x.median()))
 
@@ -275,7 +271,7 @@ with 'NoSewa' is in the training set, this feature won't help in predictive mode
 """
 Global_Data = Global_Data.drop(['Utilities'], axis=1)
 
-# Functional : data description says NA means typical
+#Functional : data description says NA means typical
 Global_Data["Functional"] = Global_Data["Functional"].fillna("Typ")
 
 """
@@ -285,20 +281,20 @@ most common string
 Global_Data['Exterior1st'] = Global_Data['Exterior1st'].fillna(Global_Data['Exterior1st'].mode()[0])
 Global_Data['Exterior2nd'] = Global_Data['Exterior2nd'].fillna(Global_Data['Exterior2nd'].mode()[0])
 
-# SaleType : Fill in again with most frequent which is "WD"
+#SaleType : Fill in again with most frequent which is "WD"
 Global_Data['SaleType'] = Global_Data['SaleType'].fillna(Global_Data['SaleType'].mode()[0])
 
-# MSSubClass : Na most likely means No building class. We can replace missing values with None
+#MSSubClass : Na most likely means No building class. We can replace missing values with None
 Global_Data['MSSubClass'] = Global_Data['MSSubClass'].fillna("None")
 
 """
 Now let's check if we still have missing values ..
 """
-# Check remaining missing values if any
+#Check remaining missing values if any
 Global_Data_NA = (Global_Data.isnull().sum() / len(Global_Data)) * 100
 Global_Data_NA = Global_Data_NA.drop(Global_Data_NA[Global_Data_NA == 0].index).sort_values(ascending=False)
-missing_data = pd.DataFrame({'Missing Ratio': Global_Data_NA})
-print("Missing Ratio is rated by % values:\n" + str(missing_data.head(int(Global_Data.shape[1]))))
+missing_data = pd.DataFrame({'Missing Ratio' :Global_Data_NA})
+print("Missing Ratio is rated by % values:\n"+str(missing_data.head( int(Global_Data.shape[1] ) ) ) )
 
 """
 As we can see, there's no more missing values in our data set ...
@@ -310,36 +306,32 @@ As we can see, there's no more missing values in our data set ...
 Sometimes, a feature is represented as numerical, but it in reality it can be treated as categorical, like a year feature
 . A year feature can be considered as a categorical feature with 12 categories. 
 """
-# MSSubClass = The building class
+#MSSubClass = The building class
 Global_Data['MSSubClass'] = Global_Data['MSSubClass'].apply(str)
 
-# Changing OverallCond into a categorical variable
+#Changing OverallCond into a categorical variable
 Global_Data['OverallCond'] = Global_Data['OverallCond'].astype(str)
 
-# Year and month sold are transformed into categorical features.
+#Year and month sold are transformed into categorical features.
 Global_Data['YrSold'] = Global_Data['YrSold'].astype(str)
 Global_Data['MoSold'] = Global_Data['MoSold'].astype(str)
-
-
-# Adding total sqfootage feature
-Global_Data['TotalSF'] = Global_Data['TotalBsmtSF'] + Global_Data['1stFlrSF'] + Global_Data['2ndFlrSF']
 
 """
 Let's have a Far-View on, before Modelling. In this section I'll argument about the next points:
     * Skewed Lables
     * Label's Hot Encoding
 """
-# Obtaining the numerical features ..
+#Obtaining the numerical features ..
 numeric_feats = Global_Data.dtypes[Global_Data.dtypes != "object"].index
 
 # Checking the skewness of all numerical features
 skewed_feats = Global_Data[numeric_feats].apply(lambda x: skew(x.dropna())).sort_values(ascending=False)
-skewness = pd.DataFrame({'Skew': skewed_feats})
-print("Let's make a look on the skewness of our lables:\n" + str(skewness.head(Global_Data.shape[1])))
+skewness = pd.DataFrame({'Skew' :skewed_feats})
+print("Let's make a look on the skewness of our lables:\n"+str(skewness.head(Global_Data.shape[1])))
 
 skewness = skewness[abs(skewness) > 0.75]
-print(
-    "There are {} skewed numerical features to be transformed by numpy log+1 transformation".format(skewness.shape[0]))
+print("There are {} skewed numerical features to be transformed by numpy log+1 transformation".format(skewness.shape[0]))
+
 
 skewed_features = skewness.index
 for feat in skewed_features:
@@ -347,9 +339,9 @@ for feat in skewed_features:
 
 # Checking the skewness of all numerical features after being transformed
 skewed_feats = Global_Data[numeric_feats].apply(lambda x: skew(x.dropna())).sort_values(ascending=False)
-skewness = pd.DataFrame({'Skew': skewed_feats})
-print("Let's make a look on the skewness of our lables after being transformed:\n" + str(
-    skewness.head(Global_Data.shape[1])))
+skewness = pd.DataFrame({'Skew' :skewed_feats})
+print("Let's make a look on the skewness of our lables after being transformed:\n"+str(skewness.head(Global_Data.shape[1])))
+
 
 """
 # Labels Hot Encoding ..
@@ -359,16 +351,18 @@ Now we're done with the skewness section, let's look on our categorical features
 
 ¿ Why Labels Hot Encoding ?
     * Hot Encoding means, transform the categorical features into many binary features as much as categories has the feature.
-
+    
     * We apply this technique because some interesting and powerfull alogrithms, don't accept non-numerical values, like
       XGboost for example. So we don't want to lose such an interesting experiece like applying XGboost in our Modeling
       process.    
-
+    
 I recommend the following website to make better understanding of Labels Hot Encoding:
     https://www.quora.com/What-is-one-hot-encoding-and-when-is-it-used-in-data-science
 """
 Global_Data = pd.get_dummies(Global_Data)
-print("Our data set shape after applying Hot Encoding on our categorical features:\n" + str(Global_Data.shape))
+print("Our data set shape after applying Hot Encoding on our categorical features:\n" + str(Global_Data.shape) )
+
+
 
 """
 Obtaining the new train and test data set ...
@@ -378,10 +372,11 @@ Now after finishing our data preprocessing, we can get the new train and test da
 train = Global_Data[:train_rows_number]
 test = Global_Data[train_rows_number:]
 
+
+
 # Now let's start modeling ...
-from sklearn.linear_model import ElasticNet, Lasso, BayesianRidge, LassoLarsIC
-from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
-from sklearn import linear_model
+from sklearn.linear_model import ElasticNet, Lasso,  BayesianRidge, LassoLarsIC
+from sklearn.ensemble import RandomForestRegressor,  GradientBoostingRegressor
 from sklearn.kernel_ridge import KernelRidge
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import RobustScaler
@@ -391,9 +386,9 @@ from sklearn.metrics import mean_squared_error, r2_score
 import xgboost as xgb
 import lightgbm as lgb
 
-# Define a cross validation strategy
-n_folds = 5  # number of iterations of cross validation.
 
+#Define a cross validation strategy
+n_folds = 5 # number of iterations of cross validation.
 
 def rmsle_cv(model):
     """
@@ -406,35 +401,29 @@ def rmsle_cv(model):
     To know more about RMSE :
         https://gerardnico.com/wiki/data_mining/rmse
     """
-    kf = KFold(n_folds, shuffle=True, random_state=123456).get_n_splits(
-        train.values)  # Shuffeling the training data set
-    rmse = np.sqrt(-cross_val_score(model, train.values, y_train, scoring="neg_mean_squared_error", cv=kf))
+    kf = KFold(n_folds, shuffle=True, random_state=123456).get_n_splits(train.values) # Shuffeling the training data set
+    rmse= np.sqrt(-cross_val_score(model, train.values, y_train, scoring="neg_mean_squared_error", cv = kf))
 
-    return (rmse)
-
+    return(rmse)
 
 # Let's design some models ..
-RF = RandomForestRegressor(n_estimators=3000, criterion='mse', max_depth=10, min_samples_split=2, min_samples_leaf=1,
-                      min_weight_fraction_leaf=0.0, max_features='auto', max_leaf_nodes=None, min_impurity_decrease=0.0,
-                      min_impurity_split=None, bootstrap=True, oob_score=False, n_jobs=1, random_state=None, verbose=0,
-                      warm_start=False)
+
 """
 Gradient Boosting Regression :
     With huber loss that makes it robust to outliers
 """
-GBoost = GradientBoostingRegressor(n_estimators=3000, learning_rate=0.075,
+GBoost = GradientBoostingRegressor(n_estimators=3000, learning_rate=0.05,
                                    max_depth=4, max_features='sqrt',
                                    min_samples_leaf=15, min_samples_split=10,
                                    loss='huber', random_state =5)
 
-# XGBoost model
+#XGBoost model
 model_xgb = xgb.XGBRegressor(colsample_bytree=0.4603, gamma=0.0468,
-                             learning_rate=0.075, max_depth=3,
+                             learning_rate=0.05, max_depth=3,
                              min_child_weight=1.7817, n_estimators=2200,
                              reg_alpha=0.4640, reg_lambda=0.8571,
                              subsample=0.5213, silent=1,nthread = -1)
-
-# LightGBM
+#LightGBM
 model_lgb = lgb.LGBMRegressor(objective='regression',num_leaves=5,
                               learning_rate=0.05, n_estimators=720,
                               max_bin = 55, bagging_fraction = 0.8,
@@ -442,9 +431,8 @@ model_lgb = lgb.LGBMRegressor(objective='regression',num_leaves=5,
                               feature_fraction_seed=9, bagging_seed=9,
                               min_data_in_leaf =6, min_sum_hessian_in_leaf = 11)
 
-# Elastic Net
-ENet = make_pipeline(RobustScaler(), linear_model.ElasticNetCV(alphas=[0.0001, 0.0005, 0.001, 0.01, 0.1, 1, 10],
-                                    l1_ratio=[.01, .1, .5, .9, .99], max_iter=5000))
+#Elastic Net
+ENet = make_pipeline(RobustScaler(), ElasticNet(alpha=0.0005, l1_ratio=.9, random_state=3))
 
 """
 Lasso:
@@ -452,41 +440,30 @@ Lasso:
 This model may be very sensitive to outliers. So we need to made it more robust on them. For that we use the sklearn's 
 Robustscaler() method on pipeline
 """
-lasso = make_pipeline(RobustScaler(), Lasso(alpha=0.0005, random_state=1))
+lasso = make_pipeline(RobustScaler(), Lasso(alpha =0.0005, random_state=1))
 
-
-# Kernel Ridge Regression
+#Kernel Ridge Regression
 KRR = KernelRidge(alpha=0.6, kernel='polynomial', degree=2, coef0=2.5)
 
 
 # Let's score our models ...
-"""
 score = rmsle_cv(lasso)
 print("\nLasso score: {:.4f} ({:.4f})\n".format(score.mean(), score.std()))
-"""
-
 
 score = rmsle_cv(ENet)
 print("ElasticNet score: {:.4f} ({:.4f})\n".format(score.mean(), score.std()))
 
-
-
 score = rmsle_cv(KRR)
 print("Kernel Ridge score: {:.4f} ({:.4f})\n".format(score.mean(), score.std()))
 
-
 score = rmsle_cv(GBoost)
 print("Gradient Boosting score: {:.4f} ({:.4f})\n".format(score.mean(), score.std()))
-
-
-score = rmsle_cv(RF)
-print("Random Forest score: {:.4f} ({:.4f})\n".format(score.mean(), score.std()))
 
 score = rmsle_cv(model_xgb)
 print("Xgboost score: {:.4f} ({:.4f})\n".format(score.mean(), score.std()))
 
 score = rmsle_cv(model_lgb)
-print("LGBM score: {:.4f} ({:.4f})\n".format(score.mean(), score.std()))
+print("LGBM score: {:.4f} ({:.4f})\n" .format(score.mean(), score.std()))
 
 
 def rmsle(y, y_pred):
@@ -496,35 +473,7 @@ def rmsle(y, y_pred):
     :param y_pred: Trained prediction model
     :return:
     """
-    return np.sqrt(mean_squared_error(y, y_pred)), r2_score(y, y_pred)
-
-
-class AveragingModels(BaseEstimator, RegressorMixin, TransformerMixin):
-    def __init__(self, models):
-        self.models = models
-
-    # we define clones of the original models to fit the data in
-    def fit(self, X, y):
-        self.models_ = [clone(x) for x in self.models]
-
-        # Train cloned base models
-        for model in self.models_:
-            model.fit(X, y)
-
-        return self
-
-    # Now we do the predictions for cloned models and average them
-    def predict(self, X):
-        predictions = np.column_stack([
-            model.predict(X) for model in self.models_
-        ])
-        return np.mean(predictions, axis=1)
-
-stacked_averaged_models = AveragingModels(models = (ENet, GBoost, model_lgb, lasso))
-stacked_averaged_models.fit(train.values, y_train)
-stacked_train_pred = stacked_averaged_models.predict(train.values)
-stacked_pred = np.expm1(stacked_averaged_models.predict(test.values))
-print(rmsle(y_train, stacked_train_pred))
+    return np.sqrt(mean_squared_error(y, y_pred)),r2_score(y, y_pred)
 
 
 
@@ -532,60 +481,37 @@ print(rmsle(y_train, stacked_train_pred))
 model_xgb.fit(train, y_train)
 xgb_train_pred = model_xgb.predict(train)
 xgb_pred = np.expm1(model_xgb.predict(test))
-print("XGBoost: " + str(rmsle(y_train, xgb_train_pred)))
-
-
+print("XGBoost: "+str(rmsle(y_train, xgb_train_pred)))
 
 # Trainging and predicting with LightGBM model.
 model_lgb.fit(train, y_train)
 lgb_train_pred = model_lgb.predict(train)
 lgb_pred = np.expm1(model_lgb.predict(test.values))
-print("LGB: " + str(rmsle(y_train, lgb_train_pred)))
-
+print("LGB: "+str(rmsle(y_train, lgb_train_pred)))
 
 # Trainging and predicting with Elastic Net model.
 ENet.fit(train, y_train)
 ENet_train_pred = ENet.predict(train)
 ENet_pred = np.expm1(ENet.predict(test.values))
-print("Elastic Net: " + str(rmsle(y_train, ENet_train_pred)))
-
-
+print("Elastic Net: "+str(rmsle(y_train, ENet_train_pred)))
 
 # Trainging and predicting with Lasso model.
 lasso.fit(train, y_train)
 lasso_train_pred = lasso.predict(train)
 lasso_pred = np.expm1(lasso.predict(test.values))
-print("Lasso: " + str(rmsle(y_train, lasso_train_pred)))
-
-
+print("Lasso: "+str(rmsle(y_train, lasso_train_pred)))
 
 # Trainging and predicting with GBoost model.
 GBoost.fit(train, y_train)
 GBoost_train_pred = GBoost.predict(train)
 GBoost_pred = np.expm1(GBoost.predict(test.values))
-print("GBoost: " + str(rmsle(y_train, GBoost_train_pred)))
-
-
-
-# Trainging and predicting with RF model.
-RF.fit(train, y_train)
-RF_train_pred = RF.predict(train)
-RF_pred = np.expm1(RF.predict(test.values))
-print("RF: " + str(rmsle(y_train, RF_train_pred)))
-
-
-# Trainging and predicting with KRR model.
-KRR.fit(train, y_train)
-KRR_train_pred = KRR.predict(train)
-KRR_pred = np.expm1(KRR.predict(test.values))
-print("KRR: " + str(rmsle(y_train, KRR_train_pred)))
-
+print("GBoost: "+str(rmsle(y_train, GBoost_train_pred)))
 
 
 # Ensembling result ...
-Ensemble_Result = stacked_pred*0.70 + xgb_pred*0.10 + lgb_pred*0.20
+Ensemble_Result = xgb_pred*0.20 + lgb_pred*0.20 + ENet_pred*0.60
 
 sub = pd.DataFrame()
 sub['Id'] = test_ID
 sub['SalePrice'] = Ensemble_Result
-sub.to_csv('submission.csv', index=False)
+sub.to_csv('submission.csv',index=False)
