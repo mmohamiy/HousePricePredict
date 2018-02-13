@@ -141,7 +141,7 @@ Global_Data_rows_without_duplicates = Global_Data.shape[0]
 duplicates_number = Global_Data_Cardinality - Global_Data_rows_without_duplicates
 print("\nThere are " + str(duplicates_number) + " DUPLICATES in Global_Data\n")
 
-# Drop the Targer column ...
+# Drop the Target column ...
 Global_Data.drop(['SalePrice'], axis=1, inplace=True)
 print("Global_Data size after deleting the Targer column is : {}".format(Global_Data.shape))
 
@@ -188,18 +188,8 @@ ults. In this case we have :
 
 "I will study both cases, cause nothing is certain in data science :)". 
 """
-
-# Case 1
-"""
 print("feature with more than 90% of missing values: " + (missing_data[missing_data['Missing Ratio'] >= 90]).index)
 Global_Data = Global_Data.drop((missing_data[missing_data['Missing Ratio'] >= 90]).index, 1)
-"""
-
-#Case 2
-Global_Data["PoolQC"] = Global_Data["PoolQC"].fillna("None")
-Global_Data["MiscFeature"] = Global_Data["MiscFeature"].fillna("None")
-Global_Data["Alley"] = Global_Data["Alley"].fillna("None")
-
 
 """
 Let's try to fill the missing data of each feature with the most appropriate values, as we think that so it is ...
@@ -320,10 +310,6 @@ Global_Data['OverallCond'] = Global_Data['OverallCond'].astype(str)
 Global_Data['YrSold'] = Global_Data['YrSold'].astype(str)
 Global_Data['MoSold'] = Global_Data['MoSold'].astype(str)
 
-
-# Adding total sqfootage feature
-Global_Data['TotalSF'] = Global_Data['TotalBsmtSF'] + Global_Data['1stFlrSF'] + Global_Data['2ndFlrSF']
-
 """
 Let's have a Far-View on, before Modelling. In this section I'll argument about the next points:
     * Skewed Lables
@@ -381,7 +367,6 @@ test = Global_Data[train_rows_number:]
 # Now let's start modeling ...
 from sklearn.linear_model import ElasticNet, Lasso, BayesianRidge, LassoLarsIC
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
-from sklearn import linear_model
 from sklearn.kernel_ridge import KernelRidge
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import RobustScaler
@@ -414,37 +399,32 @@ def rmsle_cv(model):
 
 
 # Let's design some models ..
-RF = RandomForestRegressor(n_estimators=3000, criterion='mse', max_depth=10, min_samples_split=2, min_samples_leaf=1,
-                      min_weight_fraction_leaf=0.0, max_features='auto', max_leaf_nodes=None, min_impurity_decrease=0.0,
-                      min_impurity_split=None, bootstrap=True, oob_score=False, n_jobs=1, random_state=None, verbose=0,
-                      warm_start=False)
+
 """
 Gradient Boosting Regression :
     With huber loss that makes it robust to outliers
 """
-GBoost = GradientBoostingRegressor(n_estimators=3000, learning_rate=0.075,
+GBoost = GradientBoostingRegressor(n_estimators=3000, learning_rate=0.05,
                                    max_depth=4, max_features='sqrt',
                                    min_samples_leaf=15, min_samples_split=10,
-                                   loss='huber', random_state =5)
+                                   loss='huber', random_state=5)
 
 # XGBoost model
 model_xgb = xgb.XGBRegressor(colsample_bytree=0.4603, gamma=0.0468,
-                             learning_rate=0.075, max_depth=3,
+                             learning_rate=0.05, max_depth=3,
                              min_child_weight=1.7817, n_estimators=2200,
                              reg_alpha=0.4640, reg_lambda=0.8571,
-                             subsample=0.5213, silent=1,nthread = -1)
-
+                             subsample=0.5213, silent=1, nthread=-1)
 # LightGBM
-model_lgb = lgb.LGBMRegressor(objective='regression',num_leaves=5,
+model_lgb = lgb.LGBMRegressor(objective='regression', num_leaves=5,
                               learning_rate=0.05, n_estimators=720,
-                              max_bin = 55, bagging_fraction = 0.8,
-                              bagging_freq = 5, feature_fraction = 0.2319,
+                              max_bin=55, bagging_fraction=0.8,
+                              bagging_freq=5, feature_fraction=0.2319,
                               feature_fraction_seed=9, bagging_seed=9,
-                              min_data_in_leaf =6, min_sum_hessian_in_leaf = 11)
+                              min_data_in_leaf=6, min_sum_hessian_in_leaf=11)
 
 # Elastic Net
-ENet = make_pipeline(RobustScaler(), linear_model.ElasticNetCV(alphas=[0.0001, 0.0005, 0.001, 0.01, 0.1, 1, 10],
-                                    l1_ratio=[.01, .1, .5, .9, .99], max_iter=5000))
+ENet = make_pipeline(RobustScaler(), ElasticNet(alpha=0.0005, l1_ratio=.9, random_state=3))
 
 """
 Lasso:
@@ -454,33 +434,21 @@ Robustscaler() method on pipeline
 """
 lasso = make_pipeline(RobustScaler(), Lasso(alpha=0.0005, random_state=1))
 
-
 # Kernel Ridge Regression
 KRR = KernelRidge(alpha=0.6, kernel='polynomial', degree=2, coef0=2.5)
 
-
 # Let's score our models ...
-"""
 score = rmsle_cv(lasso)
 print("\nLasso score: {:.4f} ({:.4f})\n".format(score.mean(), score.std()))
-"""
-
 
 score = rmsle_cv(ENet)
 print("ElasticNet score: {:.4f} ({:.4f})\n".format(score.mean(), score.std()))
 
-
-
 score = rmsle_cv(KRR)
 print("Kernel Ridge score: {:.4f} ({:.4f})\n".format(score.mean(), score.std()))
 
-
 score = rmsle_cv(GBoost)
 print("Gradient Boosting score: {:.4f} ({:.4f})\n".format(score.mean(), score.std()))
-
-
-score = rmsle_cv(RF)
-print("Random Forest score: {:.4f} ({:.4f})\n".format(score.mean(), score.std()))
 
 score = rmsle_cv(model_xgb)
 print("Xgboost score: {:.4f} ({:.4f})\n".format(score.mean(), score.std()))
@@ -499,42 +467,11 @@ def rmsle(y, y_pred):
     return np.sqrt(mean_squared_error(y, y_pred)), r2_score(y, y_pred)
 
 
-class AveragingModels(BaseEstimator, RegressorMixin, TransformerMixin):
-    def __init__(self, models):
-        self.models = models
-
-    # we define clones of the original models to fit the data in
-    def fit(self, X, y):
-        self.models_ = [clone(x) for x in self.models]
-
-        # Train cloned base models
-        for model in self.models_:
-            model.fit(X, y)
-
-        return self
-
-    # Now we do the predictions for cloned models and average them
-    def predict(self, X):
-        predictions = np.column_stack([
-            model.predict(X) for model in self.models_
-        ])
-        return np.mean(predictions, axis=1)
-
-stacked_averaged_models = AveragingModels(models = (ENet, GBoost, model_lgb, lasso))
-stacked_averaged_models.fit(train.values, y_train)
-stacked_train_pred = stacked_averaged_models.predict(train.values)
-stacked_pred = np.expm1(stacked_averaged_models.predict(test.values))
-print(rmsle(y_train, stacked_train_pred))
-
-
-
 # Trainging and predicting with XGBoost model.
 model_xgb.fit(train, y_train)
 xgb_train_pred = model_xgb.predict(train)
 xgb_pred = np.expm1(model_xgb.predict(test))
 print("XGBoost: " + str(rmsle(y_train, xgb_train_pred)))
-
-
 
 # Trainging and predicting with LightGBM model.
 model_lgb.fit(train, y_train)
@@ -542,14 +479,11 @@ lgb_train_pred = model_lgb.predict(train)
 lgb_pred = np.expm1(model_lgb.predict(test.values))
 print("LGB: " + str(rmsle(y_train, lgb_train_pred)))
 
-
 # Trainging and predicting with Elastic Net model.
 ENet.fit(train, y_train)
 ENet_train_pred = ENet.predict(train)
 ENet_pred = np.expm1(ENet.predict(test.values))
 print("Elastic Net: " + str(rmsle(y_train, ENet_train_pred)))
-
-
 
 # Trainging and predicting with Lasso model.
 lasso.fit(train, y_train)
@@ -557,33 +491,14 @@ lasso_train_pred = lasso.predict(train)
 lasso_pred = np.expm1(lasso.predict(test.values))
 print("Lasso: " + str(rmsle(y_train, lasso_train_pred)))
 
-
-
 # Trainging and predicting with GBoost model.
 GBoost.fit(train, y_train)
 GBoost_train_pred = GBoost.predict(train)
 GBoost_pred = np.expm1(GBoost.predict(test.values))
 print("GBoost: " + str(rmsle(y_train, GBoost_train_pred)))
 
-
-
-# Trainging and predicting with RF model.
-RF.fit(train, y_train)
-RF_train_pred = RF.predict(train)
-RF_pred = np.expm1(RF.predict(test.values))
-print("RF: " + str(rmsle(y_train, RF_train_pred)))
-
-
-# Trainging and predicting with KRR model.
-KRR.fit(train, y_train)
-KRR_train_pred = KRR.predict(train)
-KRR_pred = np.expm1(KRR.predict(test.values))
-print("KRR: " + str(rmsle(y_train, KRR_train_pred)))
-
-
-
 # Ensembling result ...
-Ensemble_Result = stacked_pred*0.70 + xgb_pred*0.10 + lgb_pred*0.20
+Ensemble_Result = xgb_pred * 0.20 + lgb_pred * 0.20 + ENet_pred * 0.60
 
 sub = pd.DataFrame()
 sub['Id'] = test_ID
