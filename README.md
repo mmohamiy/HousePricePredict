@@ -24,7 +24,7 @@ With 79 explanatory variables describing (almost) every aspect of residential ho
 8. Try different weight for each algorithm, different algorithms, different algorithm's parameters values.
 
 ### Versions:
-In the project src directory, I put a folder for each effective version. "effective version: gives higher ranking"
+In the project src directory, I put a folder for each effective version (6 versions in total). "effective version: gives higher ranking"
 
 ### Project Structure
 - In src directoy, we can find a folder for each effective commit, with the submission file and the obtained ranking.
